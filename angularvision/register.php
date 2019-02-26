@@ -130,11 +130,11 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 header("location: verifymail.php?email=".$email);
             } else{
                 echo "Something went wrong. Please try again later.";
-            }
+            }         
+			// Close statement
+			$stmt->close();
         }
-         
-        // Close statement
-        $stmt->close();
+
     }
     
     // Close connection
@@ -143,8 +143,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 ?>
 
     <div class="wrapper">
-        <h2>Sign Up</h2>
+        <div class="wrapper-title"><h2>Sign Up</h2>
         <p>Please fill this form to create an account.</p>
+        </div>
         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
             <div class="form-group <?php echo (!empty($email_err)) ? 'has-error' : ''; ?>">
                 <label>Email</label>
@@ -170,7 +171,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 <input type="submit" class="btn btn-primary" value="Submit">
                 <input type="reset" class="btn btn-default" value="Reset">
             </div>
-            <p>Already have an account? <a href="login.php">Login here</a>.</p>
+            <span>Already have an account? <a href="login.php">Login here</a>.</span>
         </form>
     </div>    
 <?php include "./footer.php"; ?>

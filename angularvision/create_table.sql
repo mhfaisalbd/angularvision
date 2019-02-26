@@ -25,6 +25,30 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `uploads`
+--
+
+CREATE TABLE `uploads` (
+  `image_id` int(11) NOT NULL,
+  `username` varchar(32) NOT NULL,
+  `image_title` varchar(255) NOT NULL,
+  `image_caption` varchar(1024) NOT NULL,
+  `mime` varchar(32) NOT NULL,
+  `catagory` varchar(64) NOT NULL,
+  `upload_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `uploads`
+--
+
+INSERT INTO `uploads` (`image_id`, `username`, `image_title`, `image_caption`, `mime`, `catagory`, `upload_time`) VALUES
+(1548860131, 'mhfaisal', 'Glass of water', 'Fresh water on the freash glass.', 'image/jpeg', 'lifestyle', '2019-01-30 20:55:31'),
+(1548860836, 'mhfaisal', 'Adhbhoot!', 'Ripe Graaps', 'image/jpeg', 'nature', '2019-01-30 21:07:15');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `users`
 --
 
@@ -49,6 +73,12 @@ INSERT INTO `users` (`id`, `email`, `verified`, `username`, `password`, `created
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `uploads`
+--
+ALTER TABLE `uploads`
+  ADD PRIMARY KEY (`image_id`);
 
 --
 -- Indexes for table `users`

@@ -1,24 +1,61 @@
 <?php
+// Initialize the session
+session_start();
+ 
+// Check if the user is logged in, if not then redirect him to login page
+if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
+    header("location: login.php");
+    exit;
+}
+?>
+<?php 
+require_once "config.php";
 
-$cf="";
-$cf_text="";
-if (!empty($_GET['cf'])){
-	$cf = $_GET['cf'];
-	if($cf == "email"){
-		$cf_text = "Your Email address has been confirmed.";
-	}
-	else if($cf == "upload"){
-		$cf_text = "Your photo has been uploaded successfully.";
-	}
-	else if($cf == "edit"){
-		$cf_text = "Your photo has been edited sucessfully.";
-	}
-	else if($cf == "del"){
-		$cf_text = "Your photo has been deleted sucessfully.";
-	} 
+$id = isset($_GET['id'])? $_GET['id'] : "0000";
+$sql = "SELECT `username`, `mime` FROM `uploads` WHERE `image_id` = '".$id."'";
+$result = $mysqli->query($sql);
+$uploader="";
+$mime = 'jpg';
+if ($result->num_rows > 0) {
+
+    while($row = $result->fetch_assoc()) {
+        $uploader = $row["username"];
+        if ($_SESSION["username"] !== $uploader){
+			header("location: photo.php?id=".$id."");
+        }
+        if ($row['mime']=='image/jpeg'){
+			$mime = 'jpg';
+		} else if ($row['mime']=='image/png'){
+			$mime = 'png';
+		} else if ($row['mime']=='image/gif'){
+			$mime = 'gif';
+		}
+    }
 }
 
+if($_SERVER["REQUEST_METHOD"] == "POST"){
+    if (isset($_POST["id"]) && isset($_POST["submit"]) && $_POST["cfm"] === "yes"){
+        $id = $_POST["id"];
+        $sql = "DELETE FROM `uploads` WHERE `uploads`.`image_id` = '".$id."'";
+        
+        if($stmt = $mysqli->prepare($sql)){
+            
+            if($stmt->execute()){
+                if (unlink("./img/uploads/".$id.".".$mime)){
+                    header("location: conformation.php?cf=del");
+                }
+            } else{
+                echo "Something went wrong. Please try again later.";
+            }
+            
+            $stmt->close();
+        } else {
+		 echo "sql not prepared!";
+		}
+    }
+}
 ?>
+
 
 
 <!DOCTYPE html>
@@ -30,7 +67,7 @@ if (!empty($_GET['cf'])){
 <title>Bootstrap Simple Success Confirmation Popup</title>
 <link href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round" rel="stylesheet">
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
@@ -82,7 +119,7 @@ if (!empty($_GET['cf'])){
 		height: 95px;
 		border-radius: 50%;
 		z-index: 9;
-		background: #82ce34;
+		background: red;
 		padding: 15px;
 		text-align: center;
 		box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1);
@@ -98,11 +135,12 @@ if (!empty($_GET['cf'])){
     .modal-confirm .btn {
         color: #fff;
         border-radius: 4px;
-		background: #82ce34;
+		/*background: #82ce34;*/
 		text-decoration: none;
 		transition: all 0.4s;
         line-height: normal;
         border: none;
+        display: inline-block;
     }
 	.modal-confirm .btn:hover, .modal-confirm .btn:focus {
 		background: #6fb32b;
@@ -127,18 +165,22 @@ if (!empty($_GET['cf'])){
 		<div class="modal-content">
 			<div class="modal-header">
 				<div class="icon-box">
-					<i class="material-icons">&#xE876;</i>
-				</div>				
-				<h4 class="modal-title">Congreats!</h4>	
+					<i class="fas fa-question"></i>
+				</div>					
 			</div>
 			<div class="modal-body">
-				<p class="text-center"><?php echo $cf_text; ?></p>
+				<p class="text-center">Are you sure about deleting this photo?</p>
 			</div>
 			<div class="modal-footer">
-				<button class="btn btn-success btn-block" data-dismiss="modal" onclick='location.href="login.php"'>OK</button>
+                <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+                <input type="text" name="id" value="<?php echo $id; ?>"  hidden>
+                <input type="text" name="cfm" value="yes"  hidden>
+                <input class="btn btn-danger btn-block" style="float: left; width: 100px;" type="submit" name="submit" value="Delete">
+                </form>
+				<button class="btn btn-success btn-block" style="float: right; width: 100px;" data-dismiss="modal" onclick='{location.href="<?php echo "./photo.php?id=".$id; ?>"}'>Cancel</button>
 			</div>
 		</div>
 	</div>
 </div>     
 </body>
-</html>                                                        
+</html>      
